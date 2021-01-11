@@ -12,12 +12,14 @@ class MainActivityViewModel  : ViewModel() {
 
     private val films = mutableListOf<Film>()
 
-    suspend fun getFilms(): MutableList<Film> = withContext(Dispatchers.IO)  {
-        delay(5000)
-        if (films.isEmpty()){
-            downloadFilms()
+    suspend fun getFilms(): MutableList<Film> {
+        return withContext(Dispatchers.IO) {
+            delay(5000)
+            if (films.isEmpty()) {
+                downloadFilms()
+            }
+            return@withContext films
         }
-        return@withContext films
     }
 
     private fun downloadFilms() {
