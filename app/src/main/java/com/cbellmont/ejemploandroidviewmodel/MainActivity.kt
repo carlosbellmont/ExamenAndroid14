@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.cbellmont.ejemploandroidviewmodel.databinding.ActivityMainBinding
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
@@ -29,18 +30,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun downloadAll(){
-        CoroutineScope(IO).launch {
-            val list = model.getFilms()
-            setTextOnMainThread(list)
+        lifecycleScope.launch {
+            model.showFilms(binding)
         }
     }
 
-    private suspend fun setTextOnMainThread(list: MutableList<Film>) {
-        withContext (Main) {
-            list.forEach {
-                binding.tvFilms.append("${it.name}\n")
-            }
-            binding.pbLoading.visibility = View.GONE
-        }
-    }
 }

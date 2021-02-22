@@ -1,29 +1,35 @@
 package com.cbellmont.ejemploandroidviewmodel
 
+import android.view.View
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.cbellmont.ejemploandroidviewmodel.databinding.ActivityMainBinding
+import kotlinx.android.synthetic.main.activity_main.view.*
+import kotlinx.coroutines.*
 
 
 class MainActivityViewModel  : ViewModel() {
 
-    private val films = mutableListOf<Film>()
+    private var films = mutableListOf<Film>()
 
-    suspend fun getFilms(): MutableList<Film> {
-        return withContext(Dispatchers.IO) {
-            delay(5000)
-            if (films.isEmpty()) {
-                downloadFilms()
+    suspend fun showFilms(binding: ActivityMainBinding) {
+        withContext(Dispatchers.Main) {
+            binding.pbLoading.visibility = View.VISIBLE
+        }
+        withContext(Dispatchers.IO) {
+            delay(1500)
+            films = downloadFilms()
+        }
+        withContext(Dispatchers.Main) {
+            films.forEach {
+                binding.tvFilms.append("${it.name}\n")
             }
-            return@withContext films
+            binding.pbLoading.visibility = View.GONE
         }
     }
 
-    private fun downloadFilms() {
-        viewModelScope.launch {
+    private suspend fun downloadFilms(): MutableList<Film> {
+        return viewModelScope.async {
             films.addAll(
                 mutableListOf(
                     Film(1, "La Amenaza Fantasma", "aaaa"),
@@ -37,8 +43,8 @@ class MainActivityViewModel  : ViewModel() {
                     Film(6, "El Ascenso de Skywalker", "aaaa")
                 )
             )
-
-        }
+            films
+        }.await()
     }
 
 
